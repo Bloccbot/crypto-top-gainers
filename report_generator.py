@@ -2,6 +2,20 @@
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
+# ACCESSING THE KEYS IN YOUR SCRIPT
+import os
+import json
+
+openai_key = os.getenv("OPENAI_API_KEY")
+email_user = os.getenv("EMAIL_SENDER")
+email_pass = os.getenv("EMAIL_APP_PASSWORD")
+
+# Load Google Sheets creds
+gsheet_json_str = os.getenv("GSHEET_CREDENTIALS_JSON")
+gsheet_creds = json.loads(gsheet_json_str)
+#########################################################################
+
+from email_sender import send_email_with_attachment
 
 def get_top_gainers(tickers):
     data = yf.download(tickers, period="1d", group_by="ticker", progress=False)
@@ -27,7 +41,16 @@ def get_top_gainers(tickers):
     today = datetime.now().strftime("%Y-%m-%d")
     filename = f"top_gainers_{today}.xlsx"
     df.to_excel(filename, index=False)
-    print(f"Saved: {filename}")
+# Uses email_sender to send the report
+
+# Send email after saving the Excel file
+send_email_with_attachment(
+    to_email="eddieloya191@gmail.com",
+    subject="🚀 Daily Crypto Gainers Report",
+    body="Attached is your automated crypto gainers report. Let me know if you want anything changed!",
+attachment_path=filename
+)
+
 
 if __name__ == "__main__":
     tickers = ["AAPL", "MSFT", "GOOGL", "TSLA", "NVDA", "AMD", "PLTR", "META"]
